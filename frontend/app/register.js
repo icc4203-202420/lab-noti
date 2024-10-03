@@ -20,30 +20,24 @@ const Register = () => {
     const pToken = await registerForPushNotificationsAsync();  // Obtenemos el token de notificación
     setPushToken(pToken);  // Actualizamos el estado de pushToken con el token de notificación
 
+    console.log('Registrando usuario');
     
     try {
-      const response = await fetch('http://192.168.1.32:3000/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.post('http://192.168.1.32:3000/register', {
+        user: {
+          username,
+          email,
+          password,
+          push_token: pushToken,
         },
-        body: JSON.stringify({
-          user: {
-            username,
-            email,
-            password,
-            push_token: pushToken,
-          },
-        }),
       });
-
-      const data = await response.json();
-      if (response.ok) {
+    
+      if (response.status === 200) {
         alert('Registro exitoso');
         router.push('/'); // Navegar a la pantalla de login después del registro exitoso
       } else {
         alert("Ya existe un usuario con esas credenciales");
-        // alert(data.errors.join('\n'));
+        // alert(response.data.errors.join('\n'));
       }
     } catch (error) {
       alert('Error en el registro');

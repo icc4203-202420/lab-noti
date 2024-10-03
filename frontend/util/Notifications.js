@@ -1,18 +1,15 @@
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 // import { getItem, saveItem } from './Storage';
 
-async function getNotificationToken() {
-    const { status } = await Notifications.getPermissionsAsync();
-    if (status !== 'granted') {
-      await Notifications.requestPermissionsAsync();
-    }
-    const projectId = Constants.expoConfig.extra.eas.projectId || 'tu-project-id';
-
-    const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
-    return token;
-}
-
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 async function registerForPushNotificationsAsync() {
   if (Platform.OS === 'android') {
@@ -46,6 +43,5 @@ async function registerForPushNotificationsAsync() {
 
 
 module.exports = {
-    getNotificationToken,
     registerForPushNotificationsAsync
 }

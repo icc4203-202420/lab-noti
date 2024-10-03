@@ -88,36 +88,29 @@ const Home = () => {
       }
     };
 
-          // await Notifications.dismissNotificationAsync(notification.request.identifier);
-      // Mostrar la notificación en la barra cuando la app está en primer plano
-      // await Notifications.presentNotificationAsync({
-      //   content: {
-      //     title: notification.request.content.title,
-      //     body: notification.request.content.body,
-      //     data: notification.request.content.data,
-      //   },
-      //   trigger: null,
-      // });
-
-
     fetchUserData();
     loadImageUrl();
   }, [user_id, imageUrl]); // Efecto que se ejecuta cuando user_id cambia
 
   useEffect(() => {
     const receivedListener = Notifications.addNotificationReceivedListener(async (notification) => {
-      const { data } = notification.request.content;
+      const { title, body , data } = notification.request.content;
       const imageUrl = data.image_url;
-      console.log("Notificación recibida", notification.request.content);
-      console.log("Scando url de la notificación", imageUrl);
-      setItem("imageUrl", imageUrl);
-      setImageUrl(imageUrl);
+
+      if (title?.includes("Imagen generada para")) {
+          setItem("imageUrl", imageUrl);
+          setImageUrl(imageUrl);
+      } else {  
+        console.log("Notificación recibida: ");
+        console.log("   title: ", title);
+        console.log("   body: ", body);
+      }
       
     });
   
     const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
       const { data } = response.notification.request.content;
-      if (data && data.image_url) {
+      if (data?.image_url) {
         // Abrir el enlace (en este caso, la imagen) en el navegador
         console.log("Abriendo la URL de la imagen en el navegador");
         Linking.openURL(data.image_url);
