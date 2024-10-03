@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "scheme": "acme",
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "name": "frontend",
+    "slug": "frontend",
+    "android": {
+      "package": "com.anonymous.frontend"
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.frontend"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b647b6e2-ee30-470f-8c3f-545b48cb7e9e"
+      }
+    },
+    "owner": "manuelbentjerodt",
+    "notification": {
+
+      "vapidPublicKey": "BOn1J9"
+    }
+  }
+}
