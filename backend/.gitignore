@@ -33,3 +33,4 @@
 /config/master.key
 
 /public/images/*
+!/public/images/default_image.jpg
