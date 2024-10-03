@@ -3,7 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { Input, Button, Text } from "react-native-elements";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import { getNotificationToken } from "../util/Notifications";
+import { registerForPushNotificationsAsync } from "../util/Notifications";
 import { saveItem, getItem } from "../util/Storage";
 
 const Login = () => {
@@ -45,7 +45,7 @@ const Login = () => {
 
   useEffect(() => {
     const getToken = async () => {
-      const token = await getNotificationToken();
+      const token = await registerForPushNotificationsAsync();
       setPushToken(token);
   
     };

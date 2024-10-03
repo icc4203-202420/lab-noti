@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';  // Usamos el Text de react-native
 import { Input, Button } from 'react-native-elements';
 import { useRouter } from 'expo-router';
-import { getNotificationToken } from '../util/Notifications';  // Importamos la función getNotificationToken
+import { registerForPushNotificationsAsync } from '../util/Notifications';  // Importamos la función registerForPushNotificationsAsync
 import axios from 'axios';
 
 const Register = () => {
@@ -17,7 +17,7 @@ const Register = () => {
   const handleRegister = async () => {
     setLoading(true);
 
-    const pToken = await getNotificationToken();  // Obtenemos el token de notificación
+    const pToken = await registerForPushNotificationsAsync();  // Obtenemos el token de notificación
     setPushToken(pToken);  // Actualizamos el estado de pushToken con el token de notificación
 
     

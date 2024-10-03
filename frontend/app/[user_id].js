@@ -20,6 +20,8 @@ const Home = () => {
       const response = await axios.post("http://192.168.1.32:3000/beers", {
         user_id: userData.id,
       });
+
+      console.log(response.data);
     } catch (error) {
       console.error("Error al pedir la foto de la cerveza");
     }
@@ -32,6 +34,7 @@ const Home = () => {
       await deleteItem("imageUrl"); // Elimina la URL de la imagen del almacenamiento
       setImageUrl(null); // Elimina la URL de la imagen del estado
       const response = await axios.delete(`http://192.168.1.32:3000/beers/${userData.id}`);
+      console.log(response.data)
     } catch (error) {
       console.error("Error al eliminar la URL de la imagen", error);
     }
@@ -85,23 +88,33 @@ const Home = () => {
       }
     };
 
+          // await Notifications.dismissNotificationAsync(notification.request.identifier);
+      // Mostrar la notificación en la barra cuando la app está en primer plano
+      // await Notifications.presentNotificationAsync({
+      //   content: {
+      //     title: notification.request.content.title,
+      //     body: notification.request.content.body,
+      //     data: notification.request.content.data,
+      //   },
+      //   trigger: null,
+      // });
+
 
     fetchUserData();
     loadImageUrl();
   }, [user_id, imageUrl]); // Efecto que se ejecuta cuando user_id cambia
 
   useEffect(() => {
-
-    const idNotHandler = Notifications.addNotificationReceivedListener((notification) => {
+    const receivedListener = Notifications.addNotificationReceivedListener(async (notification) => {
       const { data } = notification.request.content;
       const imageUrl = data.image_url;
-      // Linking.openURL(imageUrl);
+      console.log("Notificación recibida", notification.request.content);
+      console.log("Scando url de la notificación", imageUrl);
       setItem("imageUrl", imageUrl);
       setImageUrl(imageUrl);
+      
     });
   
-    
-    
     const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
       const { data } = response.notification.request.content;
       if (data && data.image_url) {
@@ -110,10 +123,10 @@ const Home = () => {
         Linking.openURL(data.image_url);
       }
     });
-    
+
     return () => {
-      responseListener.remove();
-      Notifications.removeNotificationSubscription(idNotHandler);
+      Notifications.removeNotificationSubscription(receivedListener);
+      Notifications.removeNotificationSubscription(responseListener);
     };
   }, []); 
   
