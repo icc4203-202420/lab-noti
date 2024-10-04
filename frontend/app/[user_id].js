@@ -20,9 +20,6 @@ const Home = () => {
       const response = await axios.post("http://192.168.1.32:3000/images", {
         user_id: userData.id
       });
-      const imageUrl = response.data.imageUrl;
-      setImageUrl(imageUrl);
-      setItem("imageUrl", imageUrl);
     } catch (error) {
       console.error("Error al pedir la foto de la cerveza");
     }
