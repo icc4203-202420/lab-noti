@@ -48,9 +48,7 @@ const Login = () => {
         if (userId) {
           router.push(`/${userId}`);
         }
-        console.log(await getItem("imageUrl"));
-    }
-    
+    } 
     checkIsLogged();
   }, []);
 
