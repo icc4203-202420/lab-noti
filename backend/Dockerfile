@@ -1,66 +1,140 @@
-# syntax = docker/dockerfile:1
+# # # Specify Ruby version
+# # ARG RUBY_VERSION=3.2.3
+# # FROM ruby:$RUBY_VERSION-slim as base
 
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t my-app .
-# docker run -d -p 80:80 -p 443:443 --name my-app -e RAILS_MASTER_KEY=<value from config/master.key> my-app
+# # # Install dependencies
+# # RUN apt-get update -qq && apt-get install -y \
+# #     nodejs \
+# #     postgresql-client \
+# #     libvips \
+# #     build-essential \
+# #     libffi-dev \
+# #     libssl-dev \
+# #     pkg-config \
+# #     git \
+# #     curl \
+# #     libmagickwand-dev \
+# #     imagemagick
 
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
-ARG RUBY_VERSION=3.2.3
-FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
+# # WORKDIR /app
 
-# Rails app lives here
-WORKDIR /rails
+# # # Install gems
+# # COPY Gemfile Gemfile.lock ./
+# # RUN gem install bundler && bundle install --without development test
 
-# Install base packages
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+# # # Copy the application code
+# # COPY . .
 
-# Set production environment
-ENV RAILS_ENV="production" \
-    BUNDLE_DEPLOYMENT="1" \
-    BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+# # # Precompile assets
+# # RUN RAILS_ENV=production rails assets:precompile
 
-# Throw-away build stage to reduce size of final image
-FROM base AS build
+# # EXPOSE 3000
 
-# Install packages needed to build gems
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git pkg-config && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
-
-# Install application gems
-COPY Gemfile Gemfile.lock ./
-RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    bundle exec bootsnap precompile --gemfile
-
-# Copy application code
-COPY . .
-
-# Precompile bootsnap code for faster boot times
-RUN bundle exec bootsnap precompile app/ lib/
+# # COPY ./docker-entrypoint.sh /usr/local/bin/
+# # RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# # ENTRYPOINT ["docker-entrypoint.sh"]
+# # CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3000"]
 
 
+# # Use Ruby image based on version specified
+# ARG RUBY_VERSION=3.3.4
+# FROM ruby:$RUBY_VERSION
+
+# # Set up environment variables
+# ENV RAILS_ENV=development \
+#     BUNDLE_PATH=/usr/local/bundle \
+#     GEM_HOME=/usr/local/bundle \
+#     BUNDLE_BIN=/usr/local/bundle/bin \
+#     PATH=/app/bin:$BUNDLE_BIN:$PATH
+
+# # Create a directory for the app code
+# WORKDIR /app
 
 
-# Final stage for app image
-FROM base
+# RUN apt-get update -qq && apt-get install -y \
+#     libsqlite3-dev \
+#     libvips-dev \
+#     nodejs \
+#     postgresql-client \
+#     libvips \
+#     build-essential \
+#     libffi-dev \
+#     libssl-dev \
+#     pkg-config \
+#     git \
+#     curl \
+#     libmagickwand-dev \
+#     imagemagick
 
-# Copy built artifacts: gems, application
-COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
-COPY --from=build /rails /rails
+# # Copy Gemfile and Gemfile.lock
+# COPY backend/Gemfile backend/Gemfile.lock ./
 
-# Run and own only the runtime files as a non-root user for security
-RUN groupadd --system --gid 1000 rails && \
-    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
-USER 1000:1000
+# # Install gems
+# RUN bundle install
 
-# Entrypoint prepares the database.
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+# # Copy the main application
+# COPY backend .
 
-# Start the server by default, this can be overwritten at runtime
+# # Expose port 3000 to be accessible from the host
+# EXPOSE 3000
+
+# COPY /backend/docker-entrypoint.sh /usr/local/bin/
+# RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# ENTRYPOINT ["docker-entrypoint.sh"]
+# # CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+# Usar la imagen base de Ruby especificada
+# Usar la imagen base de Ruby especificada
+ARG RUBY_VERSION=3.3.4
+FROM ruby:$RUBY_VERSION
+
+# Establecer las variables de entorno necesarias para Rails y Bundler
+ENV RAILS_ENV=development \
+    BUNDLE_PATH=/usr/local/bundle \
+    GEM_HOME=/usr/local/bundle \
+    BUNDLE_BIN=/usr/local/bundle/bin \
+    PATH=/app/bin:$BUNDLE_BIN:$PATH
+
+# Crear el directorio para el código de la app
+WORKDIR /app
+
+# Instalar las dependencias del sistema necesarias para Rails y su funcionamiento
+RUN apt-get update -qq && apt-get install -y \
+    libsqlite3-dev \
+    libvips-dev \
+    nodejs \
+    libvips \
+    build-essential \
+    libffi-dev \
+    libssl-dev \
+    pkg-config \
+    git \
+    curl \
+    libmagickwand-dev \
+    imagemagick \
+    fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar el Gemfile y Gemfile.lock
+COPY backend/Gemfile backend/Gemfile.lock ./
+
+# Instalar la versión correcta de Bundler
+RUN gem install bundler -v '~> 2.5'
+
+# Instalar las gemas especificadas en el Gemfile
+RUN bundle install
+
+# Copiar el resto de la aplicación
+COPY backend .
+
+# Exponer el puerto 3000 para Rails
 EXPOSE 3000
-CMD ["./bin/rails", "server"]
+
+# Copiar el script de entrada (entrypoint) y hacer que sea ejecutable
+COPY /backend/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Establecer el punto de entrada para el contenedor
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Definir el comando predeterminado para iniciar el servidor de Rails
+# CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3000"]

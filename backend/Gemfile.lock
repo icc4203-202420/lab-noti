@@ -309,7 +309,7 @@ DEPENDENCIES
   rubocop-rails-omakase
   sidekiq
   sinatra
-  sqlite3 (>= 1.4)
+  sqlite3 (>= 2.0)
   tzinfo-data
 
 BUNDLED WITH

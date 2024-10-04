@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile # Usar Dockerfile de desarrollo
+      args:
+        RUBY_VERSION: 3.2.3
+    volumes:
+      - ./backend:/app # Mapeo directo para desarrollo en caliente
+      - bundle_data:/usr/local/bundle
+    ports:
+      - "3000:3000" # Asegurar el mapeo correcto del puerto
+    environment:
+      RAILS_ENV: development
+      BUNDLE_PATH: /usr/local/bundle
+      REDIS_URL: redis://redis:6379/0
+    command: ./bin/rails server -b 0.0.0.0 -p 3000
+    depends_on:
+      - redis
+
+  sidekiq:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile # Mismo Dockerfile que el backend
+      args:
+        RUBY_VERSION: 3.2.3
+    volumes:
+      - ./backend:/app # Mismo volumen que el backend para compartir el código
+      - bundle_data:/usr/local/bundle
+    environment:
+      RAILS_ENV: development
+      REDIS_URL: redis://redis:6379/0
+    command: bundle exec sidekiq
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  frontend:
+      build:
+        context: .
+        dockerfile: ./frontend/Dockerfile
+      volumes:
+        - ./frontend:/app
+        - node_modules:/app/node_modules
+      ports:
+        - "19000:19000"
+        - "19001:19001"
+        - "19002:19002"
+        - "8081:8081"
+      env_file:
+        - ./frontend/.env
+      command: npx expo start --tunnel --non-interactive
+      network_mode: "host"
+      depends_on:
+        - redis
+        - backend
+
+volumes:
+  bundle_data:
+  node_modules:

@@ -34,6 +34,7 @@ class BeerImageJob < ApplicationJob
 
     combined_image.combine_options do |c|
       c.gravity 'Center'
+      c.font '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
       c.draw "text 0,0 '#{name}'"
       c.fill 'white'
       c.pointsize '32'
