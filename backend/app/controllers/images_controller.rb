@@ -1,43 +1,59 @@
 require_relative '../services/push_notification_service'
 
-class BeersController < ApplicationController
+class ImagesController < ApplicationController
 
   def create
-    user_id = params[:user_id]  
+    user_id = params[:user_id]
     user = User.find_by(id: user_id)
-
+  
     if user.present?
-      name = user.username 
+      name = user.username
       push_token = user.push_token
-      BeerImageJob.perform_later(name, push_token)
+      image_filename_prefix = "output_#{name}"
+  
+      # Eliminar imágenes que comienzan con output_{name}
+      images_to_delete = Dir[Rails.root.join("public", "images", "#{image_filename_prefix}*")]
+      images_to_delete.each do |image_path|
+        File.delete(image_path) if File.exist?(image_path)
+      end
+  
+      ImageJob.perform_later(name, push_token)
+  
       render json: { message: "La imagen para #{name} se está generando." }, status: :accepted
     else
       render json: { error: "Usuario no encontrado." }, status: :not_found
     end
   end
-
-
+  
+  
 
   def destroy
     user_id = params[:id]  
     user = User.find_by(id: user_id) 
-
+  
     puts user_id
     puts user
-
+  
     if user.present?
       name = user.username
-    end
-
-    image_path = Rails.root.join("public/images/output_#{name}.jpg")
-
-    if File.exist?(image_path)
-      File.delete(image_path)
-      render json: { message: "Imagen eliminada correctamente." }, status: :ok
+      
+      # Patrones de imagen a eliminar
+      images_to_delete = Dir[Rails.root.join("public/images/output_#{name}*")]
+  
+      # Verificar si hay imágenes que coincidan con el patrón
+      if images_to_delete.any?
+        images_to_delete.each do |image_path|
+          File.delete(image_path) if File.exist?(image_path)
+        end
+        render json: { message: "Imágenes eliminadas correctamente." }, status: :ok
+      else
+        render json: { error: "No se encontraron imágenes para eliminar." }, status: :not_found
+      end
     else
-      render json: { error: "Imagen no encontrada." }, status: :not_found
+      render json: { error: "Usuario no encontrado." }, status: :not_found
     end
   end
+  
 
 
   def share
@@ -63,5 +79,4 @@ class BeersController < ApplicationController
 
     render json: { message: "Notificación enviada a los usuarios." }, status: :ok
   end
-
 end

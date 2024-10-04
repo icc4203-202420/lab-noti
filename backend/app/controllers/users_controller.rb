@@ -14,8 +14,6 @@ class UsersController < ApplicationController
       user = User.find_by(email: params[:email])
       push_token = params[:push_token]
 
-      
-
       if user && user.authenticate(params[:password])
         if push_token
           user.update(push_token: push_token)
@@ -23,6 +21,16 @@ class UsersController < ApplicationController
         render json: { message: "Inicio de sesión exitoso", user: user }
       else
         render json: { errors: "Email o contraseña incorrectos" }, status: :unauthorized
+      end
+    end
+
+    def logout
+      user = User.find_by(id: params[:id])
+      if user
+        user.update(push_token: nil)
+        render json: { message: "Cierre de sesión exitoso" }
+      else
+        render json: { errors: "Usuario no encontrado" }, status: :not_found
       end
     end
   

@@ -55,4 +55,5 @@ gem "observer"
 gem "rmagick"
 gem "chunky_png"
 gem "httparty"
+gem "securerandom"
 

@@ -17,35 +17,37 @@ const Home = () => {
 
   const handleAskPhoto = async () => {
     try {
-      const response = await axios.post("http://192.168.1.32:3000/beers", {
-        user_id: userData.id,
+      const response = await axios.post("http://192.168.1.32:3000/images", {
+        user_id: userData.id
       });
-
-      console.log(response.data);
+      const imageUrl = response.data.imageUrl; // Suponiendo que la respuesta contiene la URL de la imagen
+      
+      // Agrega un parámetro de timestamp a la URL
+      const uniqueImageUrl = `${imageUrl}?t=${Date.now()}`;
+      setImageUrl(uniqueImageUrl);
+      await setItem("imageUrl", uniqueImageUrl); // Guarda la URL única
     } catch (error) {
       console.error("Error al pedir la foto de la cerveza");
     }
   };
+  
 
   const handleDeletePhoto = async () => {
     try {
-      console.log("Eliminando la URL de la imagen");
-      console.log(imageUrl)
       await deleteItem("imageUrl"); // Elimina la URL de la imagen del almacenamiento
       setImageUrl(null); // Elimina la URL de la imagen del estado
-      const response = await axios.delete(`http://192.168.1.32:3000/beers/${userData.id}`);
-      console.log(response.data)
+      const response = await axios.delete(`http://192.168.1.32:3000/images/${userData.id}`);
     } catch (error) {
-      console.error("Error al eliminar la URL de la imagen", error);
+      // console.error("Error al eliminar la URL de la imagen", error);
     }
   }
 
   const handleSharePhoto = async () => {
     console.log("Compartiendo la foto de la cerveza");
     try {
-      const response = await axios.post(`http://192.168.1.32:3000/beers/${userData.id}/share`);
+      const response = await axios.post(`http://192.168.1.32:3000/images/${userData.id}/share`);
     } catch (error) {
-      console.error("Error al eliminar la URL de la imagen", error);
+      console.error("Error al compartir la URL de la imagen", error);
     }
   }
     
@@ -63,6 +65,10 @@ const Home = () => {
   const handleLogOut = async () => {
     try {
       await deleteItem("userId"); 
+      await deleteItem("imageUrl");
+      const response = await axios.post("http://192.168.1.32:3000/logout", {
+        id: userData.id,
+      });      
       router.push("/");
     } catch (error) {
       console.error("Error al cerrar sesión", error);
@@ -70,15 +76,15 @@ const Home = () => {
   }
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const initData = async () => {
       try {
-
-        const response = await axios.get(
-          `http://192.168.1.32:3000/users/${user_id}`
-        );
+        
+        const response = await axios.get(`http://192.168.1.32:3000/users/${user_id}`);
         setUserData(response.data); 
       } catch (error) {
         if (error.response) {
+          await deleteItem("userId");
+          router.push("/");
           setErrorMessage("Error al obtener los datos del usuario");
         } else {
           setErrorMessage("Error de conexión");
@@ -88,14 +94,16 @@ const Home = () => {
       }
     };
 
-    fetchUserData();
+    initData();
     loadImageUrl();
   }, [user_id, imageUrl]); // Efecto que se ejecuta cuando user_id cambia
 
   useEffect(() => {
     const receivedListener = Notifications.addNotificationReceivedListener(async (notification) => {
       const { title, body , data } = notification.request.content;
-      const imageUrl = data.image_url;
+      const imageUrl = data.imageUrl;
+
+      console.log(notification.request.content)
 
       if (title?.includes("Imagen generada para")) {
           setItem("imageUrl", imageUrl);
@@ -154,8 +162,7 @@ const Home = () => {
       {userData ? (
         <>
           <Text style={styles.title}>Bienvenido, {userData.username}</Text>
-          <Button title="Pedir foto cerveza" onPress={handleAskPhoto} style={styles.button}/>
-
+          <Button title={imageUrl ? "Pedir otra foto" : "Pedir foto"} onPress={handleAskPhoto} style={styles.button}/>
 
           {imageUrl ? (
             <>

@@ -12,12 +12,12 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [user, setUser] = useState(null);
-  const [pushToken, setPushToken] = useState("");
 
   const handleLogin = async () => {
     setErrorMessage("");
     try {
 
+      const pushToken = await registerForPushNotificationsAsync();
       const response = await axios.post("http://192.168.1.32:3000/login", 
         { 
           email: email.toLocaleLowerCase(),
@@ -26,16 +26,15 @@ const Login = () => {
         }
       );
 
-      setUser(response.data.user);
-      console.log(response.data);
+      const user = response.data.user;
 
-      await saveItem("userId", `${response.data.user.id}`);
+      setUser(user);
+      await saveItem("userId", `${user.id}`);
 
       router.push(`/${response.data.user.id}`);
     } catch (error) {
 
       if (error.response) {
-        // const { data } = error.response;
         setErrorMessage("Credenciales incorrectas");
       } else {
         setErrorMessage("Error de conexión");
@@ -44,21 +43,15 @@ const Login = () => {
   };
 
   useEffect(() => {
-    const getToken = async () => {
-      const token = await registerForPushNotificationsAsync();
-      setPushToken(token);
-  
-    };
-    getToken();
-
     const checkIsLogged = async () => {
       const userId = await getItem("userId");
         if (userId) {
           router.push(`/${userId}`);
         }
+        console.log(await getItem("imageUrl"));
     }
+    
     checkIsLogged();
-
   }, []);
 
   return (

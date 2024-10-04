@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';  // Usamos el Text de react-native
+import { View, StyleSheet, Text, Alert } from 'react-native';  // Usamos el Text de react-native
 import { Input, Button } from 'react-native-elements';
 import { useRouter } from 'expo-router';
 import { registerForPushNotificationsAsync } from '../util/Notifications';  // Importamos la función registerForPushNotificationsAsync
@@ -9,41 +9,48 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [pushToken, setPushToken] = useState('');
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
   const handleRegister = async () => {
     setLoading(true);
-
-    const pToken = await registerForPushNotificationsAsync();  // Obtenemos el token de notificación
-    setPushToken(pToken);  // Actualizamos el estado de pushToken con el token de notificación
-
     console.log('Registrando usuario');
-    
     try {
       const response = await axios.post('http://192.168.1.32:3000/register', {
         user: {
           username,
           email,
-          password,
-          push_token: pushToken,
+          password
         },
       });
-    
-      if (response.status === 200) {
-        alert('Registro exitoso');
-        router.push('/'); // Navegar a la pantalla de login después del registro exitoso
-      } else {
-        alert("Ya existe un usuario con esas credenciales");
-        // alert(response.data.errors.join('\n'));
-      }
+
+      router.push('/'); 
     } catch (error) {
-      alert('Error en el registro');
+
+      Alert.alert(
+        'Usuario ya existente',
+        'Por favor, intente con otras credenciales.', 
+        [{ text: 'OK' }] 
+      );
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUsernameChange = (text) => {
+    const maxLength = 20;
+    const filteredText = text.replace(/[^a-zA-Z0-9_.]/g, '');
+  
+    if (filteredText !== text) {
+      Alert.alert(
+        'Entrada no válida',
+        `Solo se permiten letras, números, guiones bajos y puntos en el nombre de usuario.\n\nMax cantidad caracteres: ${maxLength}`,
+        [{ text: 'Aceptar' }]
+      );
+    }
+
+    setUsername(filteredText.slice(0, maxLength));
   };
 
   return (
@@ -52,7 +59,7 @@ const Register = () => {
       <Input
         placeholder="Nombre de usuario"
         value={username}
-        onChangeText={setUsername}
+        onChangeText={handleUsernameChange}
       />
       <Input
         placeholder="Correo electrónico"

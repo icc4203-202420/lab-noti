@@ -307,6 +307,7 @@ DEPENDENCIES
   redis-client
   rmagick
   rubocop-rails-omakase
+  securerandom
   sidekiq
   sinatra
   sqlite3 (>= 2.0)
