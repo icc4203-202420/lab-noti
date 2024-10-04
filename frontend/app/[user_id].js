@@ -8,11 +8,11 @@ import * as Notifications from 'expo-notifications';
 import { setItem } from "expo-secure-store";
 
 const Home = () => {
-  const { user_id } = useLocalSearchParams(); // Extrae el parámetro user_id desde la URL
+  const { user_id } = useLocalSearchParams();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [imageUrl, setImageUrl] = useState(null); // Para almacenar la URL de la imagen
+  const [imageUrl, setImageUrl] = useState(null);
   const router = useRouter();
 
   const handleAskPhoto = async () => {
@@ -20,25 +20,21 @@ const Home = () => {
       const response = await axios.post("http://192.168.1.32:3000/images", {
         user_id: userData.id
       });
-      const imageUrl = response.data.imageUrl; // Suponiendo que la respuesta contiene la URL de la imagen
-      
-      // Agrega un parámetro de timestamp a la URL
-      const uniqueImageUrl = `${imageUrl}?t=${Date.now()}`;
-      setImageUrl(uniqueImageUrl);
-      await setItem("imageUrl", uniqueImageUrl); // Guarda la URL única
+      const imageUrl = response.data.imageUrl;
+      setImageUrl(imageUrl);
+      setItem("imageUrl", imageUrl);
     } catch (error) {
       console.error("Error al pedir la foto de la cerveza");
     }
   };
   
-
   const handleDeletePhoto = async () => {
     try {
-      await deleteItem("imageUrl"); // Elimina la URL de la imagen del almacenamiento
-      setImageUrl(null); // Elimina la URL de la imagen del estado
+      await deleteItem("imageUrl");
+      setImageUrl(null);
       const response = await axios.delete(`http://192.168.1.32:3000/images/${userData.id}`);
     } catch (error) {
-      // console.error("Error al eliminar la URL de la imagen", error);
+      console.error("Error al eliminar la URL de la imagen", error);
     }
   }
 
@@ -51,12 +47,10 @@ const Home = () => {
     }
   }
     
-
-  // Función para obtener la URL de la imagen desde el almacenamiento
   const loadImageUrl = async () => {
     try {
-      const url = await getItem("imageUrl"); // Obtener la URL desde el almacenamiento
-      setImageUrl(url); // Almacena la URL en el estado
+      const url = await getItem("imageUrl");
+      setImageUrl(url);
     } catch (error) {
       console.error("Error al obtener la URL de la imagen", error);
     }
@@ -96,7 +90,7 @@ const Home = () => {
 
     initData();
     loadImageUrl();
-  }, [user_id, imageUrl]); // Efecto que se ejecuta cuando user_id cambia
+  }, [user_id, imageUrl]);
 
   useEffect(() => {
     const receivedListener = Notifications.addNotificationReceivedListener(async (notification) => {
@@ -119,8 +113,6 @@ const Home = () => {
     const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
       const { data } = response.notification.request.content;
       if (data?.image_url) {
-        // Abrir el enlace (en este caso, la imagen) en el navegador
-        console.log("Abriendo la URL de la imagen en el navegador");
         Linking.openURL(data.image_url);
       }
     });
@@ -180,7 +172,6 @@ const Home = () => {
         <Text>No se encontró información del usuario</Text>
       )}
 
-      {/* Botón de salir en la parte superior derecha */}
       <View style={styles.logoutContainer}>
         <Button title="Salir" onPress={handleLogOut} />
       </View>

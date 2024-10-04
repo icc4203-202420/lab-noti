@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, Alert } from 'react-native';  // Usamos el Text de react-native
-import { Input, Button } from 'react-native-elements';
+import { View, StyleSheet, Alert } from 'react-native';
+import { Input, Button, Text } from 'react-native-elements';
 import { useRouter } from 'expo-router';
-import { registerForPushNotificationsAsync } from '../util/Notifications';  // Importamos la función registerForPushNotificationsAsync
 import axios from 'axios';
 
 const Register = () => {
@@ -100,7 +99,7 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'center',
     marginBottom: 20,
-    fontSize: 24,  // Ajuste de tamaño de fuente
+    fontSize: 24,
     fontWeight: 'bold',
   },
   button: {
