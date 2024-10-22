@@ -18,7 +18,7 @@ const Login = () => {
     try {
 
       const pushToken = await registerForPushNotificationsAsync();
-      const response = await axios.post("http://192.168.1.32:3000/login", 
+      const response = await axios.post("http://10.33.1.236:3000/login", 
         { 
           email: email.toLocaleLowerCase(),
           password,
@@ -32,6 +32,7 @@ const Login = () => {
       await saveItem("userId", `${user.id}`);
 
       router.push(`/${response.data.user.id}`);
+      //      push(/1)
     } catch (error) {
 
       if (error.response) {
@@ -79,7 +80,7 @@ const Login = () => {
         type="outline"
         title="Crear cuenta"
         onPress={() => router.push('/register')}
-        buttonStyle={styles.button}
+        buttonStyle={styles.button}Iniciar
       />
     </View>
   );

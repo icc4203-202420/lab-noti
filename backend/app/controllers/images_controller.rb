@@ -73,7 +73,7 @@ class ImagesController < ApplicationController
         to: recipient.push_token,
         title: "El usuario #{user.username} compartió su foto contigo",
         body: "El usuario #{user.username} ha compartido su foto.",
-        data: { image_url: "http://192.168.1.32:3000/images/output_#{user.username}.jpg" }
+        data: { image_url: "http://10.33.1.236:3000/images/output_#{user.username}.jpg" }
       )
     end
 

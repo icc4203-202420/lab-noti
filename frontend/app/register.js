@@ -16,7 +16,7 @@ const Register = () => {
     setLoading(true);
     console.log('Registrando usuario');
     try {
-      const response = await axios.post('http://192.168.1.32:3000/register', {
+      const response = await axios.post('http://10.33.1.236:3000/register', {
         user: {
           username,
           email,

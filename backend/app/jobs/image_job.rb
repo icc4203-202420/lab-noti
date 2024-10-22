@@ -46,9 +46,9 @@ class ImageJob < ApplicationJob
 
     PushNotificationService.send_notification(
       to: push_token,
-      title: "Imagen generada para #{name}",
+      title: "Imagen generada",
       body: "La imagen personalizada ha sido generada.",
-      data: { imageUrl: "http://192.168.1.32:3000/images/#{output_image_name}" }
+      data: { imageUrl: "http://10.33.1.236:3000/images/#{output_image_name}", username: name }
     )
   end
 
@@ -135,7 +135,7 @@ end
 #       to: push_token,
 #       title: "Imagen generada para #{name}",
 #       body: "La imagen personalizada ha sido generada.",
-#       data: { image_url: "http://192.168.1.32:3000/images/output_#{name}.jpg" }
+#       data: { image_url: "http://10.33.1.236:3000/images/output_#{name}.jpg" }
 #     )
 
 #   end

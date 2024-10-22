@@ -17,7 +17,7 @@ const Home = () => {
 
   const handleAskPhoto = async () => {
     try {
-      const response = await axios.post("http://192.168.1.32:3000/images", {
+      const response = await axios.post("http://:3000/images", {
         user_id: userData.id
       });
     } catch (error) {
@@ -29,7 +29,7 @@ const Home = () => {
     try {
       await deleteItem("imageUrl");
       setImageUrl(null);
-      const response = await axios.delete(`http://192.168.1.32:3000/images/${userData.id}`);
+      const response = await axios.delete(`http://10.33.1.236:3000/images/${userData.id}`);
     } catch (error) {
       console.error("Error al eliminar la URL de la imagen", error);
     }
@@ -38,7 +38,7 @@ const Home = () => {
   const handleSharePhoto = async () => {
     console.log("Compartiendo la foto de la cerveza");
     try {
-      const response = await axios.post(`http://192.168.1.32:3000/images/${userData.id}/share`);
+      const response = await axios.post(`http://10.33.1.236:3000/images/${userData.id}/share`);
     } catch (error) {
       console.error("Error al compartir la URL de la imagen", error);
     }
@@ -57,7 +57,7 @@ const Home = () => {
     try {
       await deleteItem("userId"); 
       await deleteItem("imageUrl");
-      const response = await axios.post("http://192.168.1.32:3000/logout", {
+      const response = await axios.post("http://10.33.1.236:3000/logout", {
         id: userData.id,
       });      
       router.push("/");
@@ -70,7 +70,7 @@ const Home = () => {
     const initData = async () => {
       try {
         
-        const response = await axios.get(`http://192.168.1.32:3000/users/${user_id}`);
+        const response = await axios.get(`http://10.33.1.236:3000/users/${user_id}`);
         setUserData(response.data); 
       } catch (error) {
         if (error.response) {
@@ -96,9 +96,10 @@ const Home = () => {
 
       console.log(notification.request.content)
 
+      
       if (title?.includes("Imagen generada para")) {
-          setItem("imageUrl", imageUrl);
-          setImageUrl(imageUrl);
+        setItem("imageUrl", imageUrl);
+        setImageUrl(imageUrl);
       } else {  
         console.log("Notificación recibida: ");
         console.log("   title: ", title);
