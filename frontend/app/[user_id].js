@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Text, ActivityIndicator, Image, Linking } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Button } from "react-native-elements";
-import axios from "axios";
 import { getItem, deleteItem } from "../util/Storage";
 import * as Notifications from 'expo-notifications';
 import { setItem } from "expo-secure-store";
+import { api } from "../util/Api";
 
 const Home = () => {
   const { user_id } = useLocalSearchParams();
@@ -17,7 +17,7 @@ const Home = () => {
 
   const handleAskPhoto = async () => {
     try {
-      const response = await axios.post("http://:3000/images", {
+      const response = await api.post("/images", {
         user_id: userData.id
       });
     } catch (error) {
@@ -29,16 +29,15 @@ const Home = () => {
     try {
       await deleteItem("imageUrl");
       setImageUrl(null);
-      const response = await axios.delete(`http://10.33.1.236:3000/images/${userData.id}`);
+      const response = await api.delete(`/images/${userData.id}`);
     } catch (error) {
       console.error("Error al eliminar la URL de la imagen", error);
     }
   }
 
   const handleSharePhoto = async () => {
-    console.log("Compartiendo la foto de la cerveza");
     try {
-      const response = await axios.post(`http://10.33.1.236:3000/images/${userData.id}/share`);
+      const response = await api.post(`/images/${userData.id}/share`);
     } catch (error) {
       console.error("Error al compartir la URL de la imagen", error);
     }
@@ -57,7 +56,7 @@ const Home = () => {
     try {
       await deleteItem("userId"); 
       await deleteItem("imageUrl");
-      const response = await axios.post("http://10.33.1.236:3000/logout", {
+      const response = await api.post("/logout", {
         id: userData.id,
       });      
       router.push("/");
@@ -70,7 +69,7 @@ const Home = () => {
     const initData = async () => {
       try {
         
-        const response = await axios.get(`http://10.33.1.236:3000/users/${user_id}`);
+        const response = await api.get(`/users/${user_id}`);
         setUserData(response.data); 
       } catch (error) {
         if (error.response) {
@@ -92,26 +91,19 @@ const Home = () => {
   useEffect(() => {
     const receivedListener = Notifications.addNotificationReceivedListener(async (notification) => {
       const { title, body , data } = notification.request.content;
-      const imageUrl = data.imageUrl;
+      const { imageUrl, username }  = data;
 
-      console.log(notification.request.content)
-
-      
-      if (title?.includes("Imagen generada para")) {
+      if (username === userData.username) {
         setItem("imageUrl", imageUrl);
         setImageUrl(imageUrl);
-      } else {  
-        console.log("Notificación recibida: ");
-        console.log("   title: ", title);
-        console.log("   body: ", body);
       }
       
     });
   
     const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
       const { data } = response.notification.request.content;
-      if (data?.image_url) {
-        Linking.openURL(data.image_url);
+      if (data?.imageUrl) {
+        Linking.openURL(data.imageUrl);
       }
     });
 

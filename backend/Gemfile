@@ -56,4 +56,5 @@ gem "rmagick"
 gem "chunky_png"
 gem "httparty"
 gem "securerandom"
+gem "dotenv-rails"
 

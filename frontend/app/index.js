@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Input, Button, Text } from "react-native-elements";
 import { useRouter } from "expo-router";
-import axios from "axios";
 import { registerForPushNotificationsAsync } from "../util/Notifications";
 import { saveItem, getItem } from "../util/Storage";
+import { api } from "../util/Api";
 
 const Login = () => {
   const router = useRouter();
@@ -18,7 +18,7 @@ const Login = () => {
     try {
 
       const pushToken = await registerForPushNotificationsAsync();
-      const response = await axios.post("http://10.33.1.236:3000/login", 
+      const response = await api.post("/login", 
         { 
           email: email.toLocaleLowerCase(),
           password,

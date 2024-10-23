@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { Input, Button, Text } from 'react-native-elements';
 import { useRouter } from 'expo-router';
-import axios from 'axios';
+import { api } from '../util/Api';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -14,9 +14,8 @@ const Register = () => {
 
   const handleRegister = async () => {
     setLoading(true);
-    console.log('Registrando usuario');
     try {
-      const response = await axios.post('http://10.33.1.236:3000/register', {
+      const response = await api.post('/register', {
         user: {
           username,
           email,
